@@ -2,25 +2,16 @@ import paho.mqtt.client as mqtt
 import time
 import json
 
-class MQTTClient:
-    def __init__(self, client_id, broker_address, broker_port):
-        self.client_id = client_id
+class OwnTracksHandler:
+    def __init__(self, broker_address, broker_port, owntracks_topic):
         self.broker_address = broker_address
         self.broker_port = broker_port
-        self.client = mqtt.Client(self.client_id)
+        self.owntracks_topic = owntracks_topic
+
+        self.client = mqtt.Client("OwnTracksHandler")
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
-
-    def on_connect(self, client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to broker!")
-            client.subscribe("status/location/") + self.client_id #Subscribe to the desired topics
-        else:
-            print("Connection failed. RC: " + str(rc))
-
-    def on_message(self, client, userdata, msg):
-        print(msg.topic + " " + str(msg.payload))
-
+    
     def connect(self):
         self.client.connect(self.broker_address, self.broker_port)
     
@@ -30,8 +21,17 @@ class MQTTClient:
     def stop(self):
         self.client.loop_stop()
 
-    def disconnect(self):
-        self.client.disconnect()
+    def on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to OwnTracks broker! ")
+            client.subscribe(self.owntracks_topic)
+        else:
+            print("Connection to OwnTracks broker failed! ")
+
+    def on_message(self, client, userdata, msg):
+      payload = json.loads(msg.payload.decode())
+      if 'lat' in payload and 'lon' in payload:
+          print("Recieved OwnTracks location update: ", payload)
 
 class Updater:
     def __init__(self, update_interval):
@@ -61,8 +61,8 @@ class Telemetry(Updater):
 
 
 if __name__ == "__main__":
-    client = MQTTClient("bike_ID", "test.mosquitto.org", 1833)
-    client.connect()
-    client.start()
+    owntracks_handler = OwnTracksHandler("test.mosquitto.org", 1833, "owntracks/+/+")
+    owntracks_handler.connect()
+    owntracks_handler.start()
     telemetry_data = Telemetry("10:30", 15)
     print(telemetry_data)
