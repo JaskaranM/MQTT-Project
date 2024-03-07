@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS MQTTMessages (
     topic TEXT,
     payload TEXT,
     timestamp TEXT,
-    longitute TEXT
+    longitute TEXT,
+    latitude TEXT
 )
 """
 cursor.execute(create_mqtt_messages_table)
