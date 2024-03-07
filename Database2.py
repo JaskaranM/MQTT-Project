@@ -1,22 +1,28 @@
 import sqlite3
 
-connection = sqlite3.connect("Bike.db")
-#creation of the database
-print(connection.total_changes)
-
+# Connect to the SQLite database file
+connection = sqlite3.connect("MQTT_messages.db")
 cursor = connection.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS Bikes (id INTEGER, location TEXT)")
 
-cursor.execute("INSERT INTO bikes VALUES (1, '32 Eagle Lane')")
-cursor.execute("INSERT INTO bikes VALUES (2, '12 Dixon Close')")
-cursor.execute("INSERT INTO bikes VALUES (3, '25 Edward Fisher Drive')")
+# Create the MQTTMessages table if it doesn't exist
+create_mqtt_messages_table = """
+CREATE TABLE IF NOT EXISTS MQTTMessages (
+    message_ID INTEGER PRIMARY KEY,
+    bike_ID INTEGER,
+    topic TEXT,
+    payload TEXT,
+    timestamp TEXT,
+    longitute TEXT
+)
+"""
+cursor.execute(create_mqtt_messages_table)
 
-rows = cursor.execute("SELECT id, location FROM Bikes").fetchall()
-print(rows)
 
-from contextlib import closing
+cursor.close()
+connection.commit()
 
-with closing(sqlite3.connect("Bikes.db")) as connection:
-    with closing(connection.cursor()) as cursor:
-        rows = cursor.execute("SELECT 1").fetchall()
-        print(rows)
+
+with connection:
+    cursor = connection.cursor()
+    rows = cursor.execute("SELECT bike_ID, location FROM MQTTMessages").fetchall()
+    print(rows)
