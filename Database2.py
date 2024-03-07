@@ -1,18 +1,16 @@
 import sqlite3
 
-# Connect to the SQLite database file
+
 connection = sqlite3.connect("MQTT_messages.db")
 cursor = connection.cursor()
 
-# Create the MQTTMessages table if it doesn't exist
+
 create_mqtt_messages_table = """
 CREATE TABLE IF NOT EXISTS MQTTMessages (
-    message_ID INTEGER PRIMARY KEY,
-    bike_ID INTEGER,
-    topic TEXT,
-    payload TEXT,
+    message_id INTEGER PRIMARY KEY,
+    bike_id INTEGER,
     timestamp TEXT,
-    longitute TEXT,
+    longitude TEXT,
     latitude TEXT
 )
 """
@@ -25,5 +23,5 @@ connection.commit()
 
 with connection:
     cursor = connection.cursor()
-    rows = cursor.execute("SELECT bike_ID, location FROM MQTTMessages").fetchall()
+    rows = cursor.execute("SELECT bike_id, longitude, latitude FROM MQTTMessages").fetchall()
     print(rows)
