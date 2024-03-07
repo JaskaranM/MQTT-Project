@@ -8,12 +8,13 @@ class OwnTracksHandler:
         self.broker_port = broker_port
         self.owntracks_topic = owntracks_topic
 
-        self.client = mqtt.Client("OwnTracksHandler")
+        self.client = mqtt.Client("BikeTracker")
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
     
     def connect(self):
         self.client.connect(self.broker_address, self.broker_port)
+        self.client.subscribe("owntracks/+/+")
     
     def start(self):
         self.client.loop_start()
@@ -64,5 +65,5 @@ if __name__ == "__main__":
     owntracks_handler = OwnTracksHandler("test.mosquitto.org", 1833, "owntracks/+/+")
     owntracks_handler.connect()
     owntracks_handler.start()
-    telemetry_data = Telemetry("10:30", 15)
+    telemetry_data = Telemetry("10:30", 15, 60, 20)
     print(telemetry_data)
