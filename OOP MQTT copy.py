@@ -21,6 +21,8 @@ class MQTTSubscriber:
                            port=self.port, auth=auth, tls=self.ssl_settings, protocol=paho.MQTTv311)
 
 if __name__ == "__main__":
-    subscriber = MQTTSubscriber(hostname="f3ad52f868214341bbbcfa09eb9cacfa.s1.eu.hivemq.cloud",
-                                username="Bike1", password="MQTTBike1")
+    subscriber = MQTTSubscriber(hostname="da26e2370918479aba885bc54297a1d6.s1.eu.hivemq.cloud",
+    username="Bike1", 
+    password="MQTTBike1")
     subscriber.subscribe()
+    topic = "mqtt/location/bike1"
