@@ -1,68 +1,26 @@
-import paho.mqtt.client as mqtt
-import time
-import json
+import ssl
+import paho.mqtt.client as paho
+import paho.mqtt.subscribe as subscribe
 
-class OwnTracksHandler:
-    def __init__(self, broker_address, broker_port, owntracks_topic):
-        self.broker_address = broker_address
-        self.broker_port = broker_port
-        self.owntracks_topic = owntracks_topic
+class MQTTSubscriber:
+    def __init__(self, hostname, port=8883, username=None, password=None, topic="#"):
+        self.hostname = hostname
+        self.port = port
+        self.username = username
+        self.password = password
+        self.topic = topic
+        self.ssl_settings = ssl.create_default_context()
+        self.ssl_settings.check_hostname = False
 
-        self.client = mqtt.Client("OwnTracksHandler")
-        self.client.on_connect = self.on_connect
-        self.client.on_message = self.on_message
-    
-    def connect(self):
-        self.client.connect(self.broker_address, self.broker_port)
-    
-    def start(self):
-        self.client.loop_start()
+    def print_msg(self, client, userdata, message):
+        print("%s : %s" % (message.topic, message.payload))
 
-    def stop(self):
-        self.client.loop_stop()
-
-    def on_connect(self, client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to OwnTracks broker! ")
-            client.subscribe(self.owntracks_topic)
-        else:
-            print("Connection to OwnTracks broker failed! ")
-
-    def on_message(self, client, userdata, msg):
-      payload = json.loads(msg.payload.decode())
-      if 'lat' in payload and 'lon' in payload:
-          print("Recieved OwnTracks location update: ", payload)
-
-class Updater:
-    def __init__(self, update_interval):
-        self.update_interval = update_interval
-        self.last_update_time = time.time()
-
-    def update(self):
-        current_time = time.time()
-        if current_time - self.last_update_time >= self.update_interval:
-            print("Updater class updated.")
-            self.last_update_time = current_time
-
-class Telemetry(Updater):
-    def __init__(self, time, distance, update_intervals, distance_threshold):
-        super().__init__(update_intervals)
-        self.time = time
-        self.distance = distance
-        self.distance_threshold = distance_threshold
-    
-    def update(self):
-        super().update()
-
-        if self.distance >= self.distance_threshold:
-            print("Distacnce threshold reached. Updating Updater")
-            super().update()
-
-
+    def subscribe(self):
+        auth = {'username': self.username, 'password': self.password} if self.username and self.password else None
+        subscribe.callback(self.print_msg, self.topic, hostname=self.hostname,
+                           port=self.port, auth=auth, tls=self.ssl_settings, protocol=paho.MQTTv311)
 
 if __name__ == "__main__":
-    owntracks_handler = OwnTracksHandler("test.mosquitto.org", 1833, "owntracks/+/+")
-    owntracks_handler.connect()
-    owntracks_handler.start()
-    telemetry_data = Telemetry("10:30", 15)
-    print(telemetry_data)
+    subscriber = MQTTSubscriber(hostname="f3ad52f868214341bbbcfa09eb9cacfa.s1.eu.hivemq.cloud",
+                                username="Bike1", password="MQTTBike1")
+    subscriber.subscribe()
