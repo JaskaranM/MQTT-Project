@@ -3,26 +3,28 @@ import paho.mqtt.client as paho
 import paho.mqtt.subscribe as subscribe
 
 class MQTTSubscriber:
-    def __init__(self, hostname, port=8883, username=None, password=None, topic="#"):
-        self.hostname = hostname
+    def __init__(self, hostnames, port=8883, credentials=None, topics=None):
+        self.hostnames = hostnames
         self.port = port
-        self.username = username
-        self.password = password
-        self.topic = topic
+        self.credentials = credentials
+        self.topics = topics
         self.ssl_settings = ssl.create_default_context()
         self.ssl_settings.check_hostname = False
 
     def print_msg(self, client, userdata, message):
-        print("%s : %s" % (message.topic, message.payload))
+        decoded_payload = message.payload.decode("utf-8")
+        print("%s : %s" % (message.topic, decoded_payload))
 
     def subscribe(self):
-        auth = {'username': self.username, 'password': self.password} if self.username and self.password else None
-        subscribe.callback(self.print_msg, self.topic, hostname=self.hostname,
-                           port=self.port, auth=auth, tls=self.ssl_settings, protocol=paho.MQTTv311)
+        for i, hostname in enumerate(self.hostnames):
+            auth = {'username': self.credentials[i][0], 'password': self.credentials[i][1]} if self.credentials else None
+            for topic in self.topics:
+                subscribe.callback(self.print_msg, topic, hostname=hostname,
+                                   port=self.port, auth=auth, tls=self.ssl_settings, protocol=paho.MQTTv311)
 
 if __name__ == "__main__":
-    subscriber = MQTTSubscriber(hostname="da26e2370918479aba885bc54297a1d6.s1.eu.hivemq.cloud",
-    username="Bike1", 
-    password="MQTTBike1")
+    hostnames = ["bike-ex2s1d.a01.euc1.aws.hivemq.cloud"]
+    credentials = [("Bike1", "MQTTBike1"), ("Bike2", "MQTTBike2"), ("Bike3", "MQTTBike3"), ("Bike4", "MQTTBike4")]
+    topics = ["mqtt/location/bike1", "mqtt/location/bike2", "mqtt/location/bike3","mqtt/location/bike4"]
+    subscriber = MQTTSubscriber(hostnames=hostnames, credentials=credentials, topics=topics)
     subscriber.subscribe()
-    topic = "mqtt/location/bike1"
