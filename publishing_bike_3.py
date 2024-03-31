@@ -2,7 +2,7 @@ import paho.mqtt.subscribe as subscribe
 import ssl
 import paho.mqtt.client as paho
 
-def print_msg(client, userdata, message):
+def print_msg(message):
     decoded_payload = message.payload.decode("utf-8")
     print("%s : %s" % (message.topic, decoded_payload))
 

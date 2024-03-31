@@ -11,7 +11,7 @@ class MQTTSubscriber:
         self.ssl_settings = ssl.create_default_context()
         self.ssl_settings.check_hostname = False
 
-    def print_msg(self, client, userdata, message):
+    def print_msg(self, message):
         decoded_payload = message.payload.decode("utf-8")
         print("%s : %s" % (message.topic, decoded_payload))
 
