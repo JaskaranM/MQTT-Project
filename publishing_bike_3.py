@@ -10,5 +10,5 @@ ssl_settings = ssl.create_default_context()
 ssl_settings.check_hostname = False
 
 auth = {'username': "Bike3", 'password': "MQTTBike3"}
-subscribe.callback(print_msg, "mqtt/location/bike3", hostname="bike-ex2s1d.a01.euc1.aws.hivemq.cloud",
+subscribe.callback(print_msg, "mqtt/location/bike3", hostname="mqtt-s8trni.a01.euc1.aws.hivemq.cloud",
                    port=8883, auth=auth, tls=ssl_settings, protocol=paho.MQTTv311)

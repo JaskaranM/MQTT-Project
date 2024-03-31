@@ -23,7 +23,7 @@ class MQTTSubscriber:
                                    port=self.port, auth=auth, tls=self.ssl_settings, protocol=paho.MQTTv311)
 
 if __name__ == "__main__":
-    hostnames = ["bike-ex2s1d.a01.euc1.aws.hivemq.cloud"]
+    hostnames = ["mqtt-s8trni.a01.euc1.aws.hivemq.cloud"]
     credentials = [("Bike1", "MQTTBike1"), ("Bike2", "MQTTBike2"), ("Bike3", "MQTTBike3"), ("Bike4", "MQTTBike4")]
     topics = ["mqtt/location/bike1", "mqtt/location/bike2", "mqtt/location/bike3","mqtt/location/bike4"]
     subscriber = MQTTSubscriber(hostnames=hostnames, credentials=credentials, topics=topics)
