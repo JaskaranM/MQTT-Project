@@ -2,25 +2,24 @@ import paho.mqtt.subscribe as subscribe
 import ssl
 import sqlite3
 
-# Security aspect of the code
+#security aspect of the code
 ssl_settings = ssl.create_default_context()
 ssl_settings.check_hostname = False
 
-# Define function to process messages and save location to the database
-def process_message(client, userdata, message):
+#decodes the message
+def decode_message(client, userdata, message):
     decoded_payload = message.payload.decode("utf-8")
     print("Received message: %s" % decoded_payload)
-    bike_id = userdata  # Extract bike_id from userdata
-    # Takes the longitude and latitude out of the message
+    bike_id = userdata
     latitude, longitude = map(float, decoded_payload.split(','))
-    save_location_to_database(bike_id, latitude, longitude)
+    save_to_database(bike_id, latitude, longitude)
 
-# Save location to the database
-def save_location_to_database(bike_id, latitude, longitude):
-    # Connects to the database and creates the pointer that allows for queries
+
+def save_to_database(bike_id, latitude, longitude):
+    #connects to the database and creates the pointer that allows for queries
     connection = sqlite3.connect('Database')
     cursor = connection.cursor()
-    # Update location based on bike_id
+    #updates row based on BikeID
     cursor.execute("UPDATE Bikes SET Latitude = ?, Longitude = ? WHERE BikeID = ?", (latitude, longitude, bike_id))
     connection.commit()
 
@@ -29,7 +28,7 @@ def save_location_to_database(bike_id, latitude, longitude):
     cursor.close()
     connection.close()
 
-# Define MQTT subscription credentials and topics for each bike
+#the credentials for each bike
 subscriptions = [
     {"username": "Bike1", "password": "MQTTBike1", "topic": "mqtt/location/bike1"},
     {"username": "Bike2", "password": "MQTTBike2", "topic": "mqtt/location/bike2"},
@@ -37,14 +36,14 @@ subscriptions = [
     {"username": "Bike4", "password": "MQTTBike4", "topic": "mqtt/location/bike4"}
 ]
 
-# Subscribe to MQTT topics for each bike
+#subscribes to topics
 for sub in subscriptions:
     subscribe.callback(
-        process_message, 
+        decode_message, 
         sub["topic"], 
         hostname="mqtt-s8trni.a01.euc1.aws.hivemq.cloud",
         port=8883, 
         auth=sub, 
         tls=ssl_settings,
-        userdata=sub["username"]  # Pass bike_id as userdata
+        userdata=sub["username"]
     )
